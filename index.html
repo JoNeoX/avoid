@@ -23,6 +23,12 @@
     <script>
         var ALTURA, LARGURA, canvas, ctx
 
+        var estados = {
+            "jogar": 0,
+            "jogando": 1,
+            "perdeu": 3
+        }
+        
         var teclas = []; 
 
         meteoros = {
@@ -106,6 +112,8 @@
                 this.n += .20
                 this.pts = Math.floor(this.n)
 
+                // Movimento
+
                 if (teclas[87] && this.y > 0 || teclas[38] && this.y > 0 ) { // Tecla W ou seta para cima
                     player.y -= this.velocidade; // Move para cima
                     this.dashdirection = "up";
@@ -126,6 +134,20 @@
                     this.dashdirection = "right";
                     
                 }
+
+                // Colisao
+
+                for (var i = 0, tam = meteoros._mtrs.length; i < tam; i++) {
+                    var meteoro = meteoros._mtrs[i];
+                    if (
+                        this.x < meteoro.x + meteoro.largura &&
+                        this.x + this.largura > meteoro.x &&
+                        this.y < meteoro.y + meteoro.altura &&
+                        this.y + this.altura > meteoro.y) {
+                        alert("perdeu");
+                    }
+                }
+
             },
         
 
@@ -134,7 +156,7 @@
                 ctx.fillRect(this.x, this.y, this.largura, this.altura);
             }
 
-            }
+        }
 
 
         function main() {
