@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mars Invaders</title>
+    <style>
+        body {
+            background-color: rgb(0, 0, 44);
+        }
+
+        canvas {
+            position: absolute;
+            top: 0px;
+            bottom: 0px;
+            left: 0px;
+            right: 0px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        var ALTURA, LARGURA, canvas, ctx
+
+        var teclas = []; 
+
+        meteoros = {
+            _mtrs: [],
+            delay: 30,
+            rnd: 30 + Math.floor(40 * Math.random()),
+            v: 2,
+            d: 40,
+            vel_n: 2,
+            del_n: 40,
+            
+            insere: function() {
+                
+                this._mtrs.push({  
+                    largura: this.rnd,
+                    altura: this.rnd,
+                    x: Math.floor(canvas.width * Math.random()),
+                    y: -80,
+                    cor: "#7a1912",
+                    velocidade: this.vel_n + Math.floor(3 * Math.random()),
+                    
+                });
+                
+                this.delay = this.del_n //+ Math.floor(30 * Math.random());
+            },
+            desenha: function() {
+                for (var i = 0, tam = this._mtrs.length; i < tam; i++) {
+                    var meteoro = this._mtrs[i];
+                    ctx.fillStyle = meteoro.cor;
+                    ctx.fillRect(meteoro.x, meteoro.y, meteoro.largura, meteoro.altura);
+                }
+            },
+            atualiza: function() {
+                // Diminui o delay constantemente
+                if (this.d > 6) {
+                    this.d -= .009
+                }
+                if (this.d <= 0) {
+                    this.d = 0
+                }
+                this.del_n = Math.floor(this.d)
+
+                // Aumenta a velocidade constantemente
+                this.v += .002
+                this.vel_n = Math.floor(this.v)
+                
+                this.rnd = 30 + Math.floor(40 * Math.random());
+                if (this.delay == 0) 
+                    this.insere();
+                else 
+                    this.delay --
+                for (var i = 0, tam = this._mtrs.length; i < tam; i++) {
+                    var meteoro = this._mtrs[i];
+                    meteoro.y += meteoro.velocidade;
+
+                    if (meteoro.y > canvas.height) {
+                        this._mtrs.splice(i, 1);
+                        tam--;
+                        i--;
+                    }
+
+                }
+            },
+            limpa: function() {
+                this._mtrs = []
+            }   
+
+        }
+
+        player = {
+            altura: 50,
+            largura: 40,
+            x: 300,
+            y: 500,
+            cor: "#fcba03",
+            velocidade: 7,
+            pts: 0,
+            n: 0,
+
+            atualiza: function() {
+                this.n += .20
+                this.pts = Math.floor(this.n)
+
+                if (teclas[87] && this.y > 0 || teclas[38] && this.y > 0 ) { // Tecla W ou seta para cima
+                    player.y -= this.velocidade; // Move para cima
+                    this.dashdirection = "up";
+                }
+
+                if (teclas[83] && this.y < canvas.height - this.altura || teclas[40] && this.y < canvas.height - this.altura) { // Tecla S ou seta para baixo
+                    player.y += this.velocidade; // Move para baixo
+                    this.dashdirection = "down";
+                }
+
+                if (teclas[65] && this.x > 0 || teclas[37] && this.x > 0) { // Tecla A ou seta para a esquerda
+                    player.x -= this.velocidade; // Move para a esquerda
+                    this.dashdirection = "left";
+                }
+
+                if (teclas[68] && this.x < canvas.width - this.largura || teclas[39] && this.x < canvas.width - this.largura ) { // Tecla D ou seta para a direita
+                    player.x += this.velocidade; // Move para a direita
+                    this.dashdirection = "right";
+                    
+                }
+            },
+        
+
+            desenha: function() {
+                ctx.fillStyle = this.cor;
+                ctx.fillRect(this.x, this.y, this.largura, this.altura);
+            }
+
+            }
+
+
+        function main() {
+            ALTURA = window.innerHeight;
+            LARGURA = window.innerWidth;
+
+            canvas = document.createElement("canvas");
+            canvas.width = LARGURA;
+            canvas.height = ALTURA;
+
+            if (canvas.width >= 600) {
+                canvas.width = 600;
+            }
+            if (canvas.height >= 600) {
+                canvas.height = 600;
+            }
+
+            canvas.style.border = "1px solid black";
+            ctx = canvas.getContext("2d");
+            document.body.appendChild(canvas);
+
+            document.addEventListener("keydown", function(event) {
+                teclas[event.keyCode] = true;
+            });
+
+            document.addEventListener("keyup", function(event) {
+                teclas[event.keyCode] = false;
+
+            });
+            
+            roda();
+        }
+
+        function desenha() {
+            ctx.fillStyle = "#50beff";
+            ctx.fillRect(0, 0, LARGURA, ALTURA);
+            player.desenha();
+            meteoros.desenha();
+            ctx.font = "40px Arial";
+            ctx.fillStyle = "#fff"
+            ctx.fillText("Pontos:" + player.pts, 20, 40);
+        }
+
+        function atualiza() {
+            player.atualiza();
+            meteoros.atualiza();
+            
+        }
+
+        function roda() {
+            atualiza();
+            desenha();
+
+            window.requestAnimationFrame(roda)
+        }
+        main();
+    </script>
+</body>
+</html>
