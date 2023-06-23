@@ -21,7 +21,7 @@
 </head>
 <body>
     <script>
-        var ALTURA, LARGURA, canvas, ctx
+        var ALTURA, LARGURA, canvas, ctx, estadoAtual
 
         var estados = {
             "jogar": 0,
@@ -116,22 +116,20 @@
 
                 if (teclas[87] && this.y > 0 || teclas[38] && this.y > 0 ) { // Tecla W ou seta para cima
                     player.y -= this.velocidade; // Move para cima
-                    this.dashdirection = "up";
                 }
 
                 if (teclas[83] && this.y < canvas.height - this.altura || teclas[40] && this.y < canvas.height - this.altura) { // Tecla S ou seta para baixo
                     player.y += this.velocidade; // Move para baixo
-                    this.dashdirection = "down";
+
                 }
 
                 if (teclas[65] && this.x > 0 || teclas[37] && this.x > 0) { // Tecla A ou seta para a esquerda
                     player.x -= this.velocidade; // Move para a esquerda
-                    this.dashdirection = "left";
+                    
                 }
 
                 if (teclas[68] && this.x < canvas.width - this.largura || teclas[39] && this.x < canvas.width - this.largura ) { // Tecla D ou seta para a direita
                     player.x += this.velocidade; // Move para a direita
-                    this.dashdirection = "right";
                     
                 }
 
@@ -144,7 +142,7 @@
                         this.x + this.largura > meteoro.x &&
                         this.y < meteoro.y + meteoro.altura &&
                         this.y + this.altura > meteoro.y) {
-                        alert("perdeu");
+                        estadoAtual = estados.perdeu;
                     }
                 }
 
@@ -178,6 +176,8 @@
             ctx = canvas.getContext("2d");
             document.body.appendChild(canvas);
 
+            document.addEventListener("mousedown", clique);
+
             document.addEventListener("keydown", function(event) {
                 teclas[event.keyCode] = true;
             });
@@ -186,24 +186,61 @@
                 teclas[event.keyCode] = false;
 
             });
-            
+
+            estadoAtual = estados.jogar;
             roda();
         }
 
+        function clique(event) {
+            if (estadoAtual == estados.jogar) {
+                estadoAtual = estados.jogando;
+            }
+            else if (estadoAtual == estados.perdeu) {
+                meteoros.v = 2;
+                meteoros.vel_n = 2;
+                meteoros.d = 40;
+                meteoros.del_n = 40;
+                meteoros.limpa();
+                player.x = canvas.width / 2 - player.largura / 2;
+                player.y = 500;
+                player.pts = 0;
+                player.n = 0;
+            
+                estadoAtual = estados.jogar;
+            }
+        }
+
         function desenha() {
-            ctx.fillStyle = "#50beff";
+            ctx.fillStyle = "#50beff"; 
             ctx.fillRect(0, 0, LARGURA, ALTURA);
+
+            if (estadoAtual == estados.jogar) {
+                ctx.fillStyle = "green"
+                ctx.fillRect(canvas.width / 2, canvas.height / 2, 100, 100)
+            } 
+
+            else if (estadoAtual == estados.perdeu) {
+                ctx.fillStyle = "red";
+                ctx.fillRect(canvas.width / 2, canvas.height / 2, 100, 100)
+            } 
+
+            else if (estadoAtual == estados.jogando) {
+                meteoros.desenha();
+                ctx.font = "40px Arial";
+                ctx.fillStyle = "#fff";
+                ctx.fillText("Pontos:" + player.pts, 20, 40);
+            }
             player.desenha();
-            meteoros.desenha();
-            ctx.font = "40px Arial";
-            ctx.fillStyle = "#fff"
-            ctx.fillText("Pontos:" + player.pts, 20, 40);
+      
+            
         }
 
         function atualiza() {
-            player.atualiza();
-            meteoros.atualiza();
-            
+            if (estadoAtual == estados.jogando) {
+                player.atualiza();
+                meteoros.atualiza();
+            }
+    
         }
 
         function roda() {
