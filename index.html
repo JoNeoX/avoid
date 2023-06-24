@@ -21,7 +21,7 @@
 </head>
 <body>
     <script>
-        var ALTURA, LARGURA, canvas, ctx, estadoAtual
+        var ALTURA, LARGURA, canvas, ctx, estadoAtual, recorde
 
         var estados = {
             "jogar": 0,
@@ -148,7 +148,6 @@
 
             },
         
-
             desenha: function() {
                 ctx.fillStyle = this.cor;
                 ctx.fillRect(this.x, this.y, this.largura, this.altura);
@@ -188,6 +187,10 @@
             });
 
             estadoAtual = estados.jogar;
+            recorde = localStorage.getItem("recorde")
+
+            if (recorde == null) {recorde = 0};
+
             roda();
         }
 
@@ -196,15 +199,7 @@
                 estadoAtual = estados.jogando;
             }
             else if (estadoAtual == estados.perdeu) {
-                meteoros.v = 2;
-                meteoros.vel_n = 2;
-                meteoros.d = 40;
-                meteoros.del_n = 40;
-                meteoros.limpa();
-                player.x = canvas.width / 2 - player.largura / 2;
-                player.y = 500;
-                player.pts = 0;
-                player.n = 0;
+                reset();
             
                 estadoAtual = estados.jogar;
             }
@@ -216,12 +211,12 @@
 
             if (estadoAtual == estados.jogar) {
                 ctx.fillStyle = "green"
-                ctx.fillRect(canvas.width / 2, canvas.height / 2, 100, 100)
+                ctx.fillRect(canvas.width / 2 - 50, canvas.height / 2 - 50, 100, 100)
             } 
 
             else if (estadoAtual == estados.perdeu) {
                 ctx.fillStyle = "red";
-                ctx.fillRect(canvas.width / 2, canvas.height / 2, 100, 100)
+                ctx.fillRect(canvas.width / 2 - 50, canvas.height / 2 - 50, 100, 100)
             } 
 
             else if (estadoAtual == estados.jogando) {
@@ -241,6 +236,23 @@
                 meteoros.atualiza();
             }
     
+        }
+
+        function reset() {
+            if (player.pts > recorde) {
+                localStorage.setItem("recorde", player.pts)
+                recorde = player.pts
+            }
+            meteoros.v = 2;
+            meteoros.vel_n = 2;
+            meteoros.d = 40;
+            meteoros.del_n = 40;
+            meteoros.limpa();
+            player.x = canvas.width / 2 - player.largura / 2;
+            player.y = 500;
+            player.pts = 0;
+            player.n = 0;
+            
         }
 
         function roda() {
