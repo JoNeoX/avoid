@@ -21,7 +21,7 @@
 </head>
 <body>
     <script>
-        var ALTURA, LARGURA, canvas, ctx, estadoAtual, recorde
+        var ALTURA, LARGURA, canvas, ctx, estadoAtual, recorde, pausado = false
 
         var estados = {
             "jogar": 0,
@@ -132,6 +132,7 @@
                     player.x += this.velocidade; // Move para a direita
                     
                 }
+                
 
                 // Colisao
 
@@ -151,7 +152,13 @@
             desenha: function() {
                 ctx.fillStyle = this.cor;
                 ctx.fillRect(this.x, this.y, this.largura, this.altura);
-            }
+            },
+
+            checkPaused: function() {
+                if (estadoAtual == estados.jogando && teclas[27]) {
+                    pausado = !pausado
+                }
+            },
 
         }
 
@@ -179,6 +186,7 @@
 
             document.addEventListener("keydown", function(event) {
                 teclas[event.keyCode] = true;
+                player.checkPaused()
             });
 
             document.addEventListener("keyup", function(event) {
@@ -205,6 +213,11 @@
             }
         }
 
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+
         function desenha() {
             ctx.fillStyle = "#50beff"; 
             ctx.fillRect(0, 0, LARGURA, ALTURA);
@@ -225,16 +238,26 @@
                 ctx.fillStyle = "#fff";
                 ctx.fillText("Pontos:" + player.pts, 20, 40);
             }
+
+            if (pausado == true) {
+                // #00000080
+                ctx.fillStyle = "#00000080";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "#fff";
+                ctx.font = "40 arial";
+                ctx.fillText("PAUSADO", canvas.width/2 - 100, canvas.height/2)
+            }
             player.desenha();
       
             
         }
 
         function atualiza() {
-            if (estadoAtual == estados.jogando) {
+            if (estadoAtual == estados.jogando && pausado == false) {
                 player.atualiza();
                 meteoros.atualiza();
             }
+            
     
         }
 
