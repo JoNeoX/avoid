@@ -49,6 +49,7 @@
                     y: -80,
                     cor: "#7a1912",
                     velocidade: this.vel_n + Math.floor(3 * Math.random()),
+                    daDano: true
                     
                 });
                 
@@ -101,14 +102,61 @@
         player = {
             altura: 50,
             largura: 40,
-            x: 300,
+            x: window.innerWidth / 2,
             y: 500,
             cor: "#fcba03",
             velocidade: 7,
             pts: 0,
             n: 0,
+            vidas: 2,
+            touchStartX: 0,
+            touchStartY: 0,
+
+            // "Se funciona, não mexe"
+
+            handleTouchStart: function(event) {
+                if (event.targetTouches.length === 1) {
+                    var touch = event.targetTouches[0];
+                    this.touchStartX = touch.clientX;
+                    this.touchStartY = touch.clientY;
+                }
+            },
+            
+            handleTouchMove: function(event) {
+                event.preventDefault();
+
+                if (event.targetTouches.length === 1) {
+                    var touch = event.targetTouches[0];
+                    var touchX = touch.clientX;
+                    var touchY = touch.clientY;
+
+                    var deltaX = touchX - this.touchStartX;
+                    var deltaY = touchY - this.touchStartY;
+
+                    var newX = this.x + deltaX;
+                    var newY = this.y + deltaY;
+
+                    if (newX >= 0 && newX <= canvas.width - this.largura && estadoAtual == estados.jogando) {
+                        this.x = newX;
+                    }
+
+                    if (newY >= 0 && newY <= canvas.height - this.altura && estadoAtual == estados.jogando) {
+                        this.y = newY;
+                    }
+
+                    this.touchStartX = touchX;
+                    this.touchStartY = touchY;
+                }
+            
+            },
+
 
             atualiza: function() {
+
+                if (this.vidas <= 0) {
+                    estadoAtual = estados.perdeu;
+                }
+
                 this.n += .20
                 this.pts = Math.floor(this.n)
 
@@ -133,7 +181,6 @@
                     
                 }
                 
-
                 // Colisao
 
                 for (var i = 0, tam = meteoros._mtrs.length; i < tam; i++) {
@@ -143,10 +190,12 @@
                         this.x + this.largura > meteoro.x &&
                         this.y < meteoro.y + meteoro.altura &&
                         this.y + this.altura > meteoro.y) {
-                        estadoAtual = estados.perdeu;
-                    }
+                            if (meteoro.daDano == true) {
+                                this.vidas--;
+                                meteoro.daDano = false;
+                            }
+                        }
                 }
-
             },
         
             desenha: function() {
@@ -160,14 +209,18 @@
                 }
             },
 
+
         }
 
 
         function main() {
+            
+            canvas = document.createElement("canvas");
+
+
             ALTURA = window.innerHeight;
             LARGURA = window.innerWidth;
 
-            canvas = document.createElement("canvas");
             canvas.width = LARGURA;
             canvas.height = ALTURA;
 
@@ -182,6 +235,13 @@
             ctx = canvas.getContext("2d");
             document.body.appendChild(canvas);
 
+            canvas.addEventListener("touchstart", function(event) {
+                player.handleTouchStart(event);
+            }, false);
+            
+            canvas.addEventListener("touchmove", function(event) {
+                player.handleTouchMove(event);
+            }, false);
             document.addEventListener("mousedown", clique);
 
             document.addEventListener("keydown", function(event) {
@@ -213,6 +273,38 @@
             }
         }
 
+        function handleTouchStart(event) {
+                touchStartX = event.touches[0].clientX;
+                touchStartY = event.touches[0].clientY;
+        }
+
+        function handleTouchMove(event) {
+            event.preventDefault(); // Evita o comportamento padrão do toque, como scroll da página
+
+            var touchX = event.touches[0].clientX;
+            var touchY = event.touches[0].clientY;
+
+            // Calcula a diferença de posição entre o toque inicial e o toque atual
+            if (player.x <= canvas.width && player.x >= 0) {
+                var deltaX = touchX - touchStartX;
+            }
+            
+            if (player.y <= canvas.height && player.y >= 0) {
+                var deltaY = touchY - touchStartY;
+            }
+            
+
+            // Aplica a lógica de movimento com base na diferença de posição
+            
+            player.x += deltaX;
+            player.y += deltaY;
+            console.log("deltaX");
+
+            // Atualiza as coordenadas de toque inicial para o próximo movimento
+            touchStartX = touchX;
+            touchStartY = touchY;
+        }
+
         function isMobileDevice() {
             return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         }
@@ -225,11 +317,17 @@
             if (estadoAtual == estados.jogar) {
                 ctx.fillStyle = "green"
                 ctx.fillRect(canvas.width / 2 - 50, canvas.height / 2 - 50, 100, 100)
+                ctx.font = "20px Arial";
+                ctx.fillStyle = "#fff";
+                ctx.fillText("Clique para Jogar", canvas.width/2 - 80, canvas.height/2 - 60);
             } 
 
             else if (estadoAtual == estados.perdeu) {
                 ctx.fillStyle = "red";
                 ctx.fillRect(canvas.width / 2 - 50, canvas.height / 2 - 50, 100, 100)
+                ctx.font = "20px Arial";
+                ctx.fillStyle = "#fff";
+                ctx.fillText("Clique para recomeçar", canvas.width/2 - 100, canvas.height/2 - 60);
             } 
 
             else if (estadoAtual == estados.jogando) {
@@ -237,6 +335,8 @@
                 ctx.font = "40px Arial";
                 ctx.fillStyle = "#fff";
                 ctx.fillText("Pontos:" + player.pts, 20, 40);
+                ctx.fillText("Vidas:" + player.vidas, 20, 80);
+                
             }
 
             if (pausado == true) {
@@ -248,7 +348,6 @@
                 ctx.fillText("PAUSADO", canvas.width/2 - 100, canvas.height/2)
             }
             player.desenha();
-      
             
         }
 
@@ -275,6 +374,7 @@
             player.y = 500;
             player.pts = 0;
             player.n = 0;
+            player.vidas = 2;
             
         }
 
