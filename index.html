@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mars Invaders</title>
     <style>
+
+
         body {
             background-color: rgb(0, 0, 44);
         }
@@ -16,6 +18,7 @@
             left: 0px;
             right: 0px;
             margin: auto;
+
         }
     </style>
 </head>
@@ -102,9 +105,9 @@
         player = {
             altura: 50,
             largura: 40,
-            x: window.innerWidth / 2,
+            x: 200,
             y: 500,
-            cor: "#fcba03",
+            cor: "#3ea616",
             velocidade: 7,
             pts: 0,
             n: 0,
@@ -210,13 +213,12 @@
             },
 
 
-        }
+        };
 
 
         function main() {
             
             canvas = document.createElement("canvas");
-
 
             ALTURA = window.innerHeight;
             LARGURA = window.innerWidth;
@@ -231,7 +233,7 @@
                 canvas.height = 600;
             }
 
-            canvas.style.border = "1px solid black";
+
             ctx = canvas.getContext("2d");
             document.body.appendChild(canvas);
 
