@@ -322,6 +322,7 @@
                 ctx.font = "20px Arial";
                 ctx.fillStyle = "#fff";
                 ctx.fillText("Clique para Jogar", canvas.width/2 - 80, canvas.height/2 - 60);
+                ctx.fillText("recorde:" + recorde, canvas.width/2 - 53, canvas.height/2 + 70);
             } 
 
             else if (estadoAtual == estados.perdeu) {
@@ -330,6 +331,7 @@
                 ctx.font = "20px Arial";
                 ctx.fillStyle = "#fff";
                 ctx.fillText("Clique para recomeçar", canvas.width/2 - 100, canvas.height/2 - 60);
+                ctx.fillText("Pontos:" + player.pts, canvas.width/2 - 44, canvas.height/2 + 70);
             } 
 
             else if (estadoAtual == estados.jogando) {
