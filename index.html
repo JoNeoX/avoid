@@ -26,6 +26,20 @@
     <script>
         var ALTURA, LARGURA, canvas, ctx, estadoAtual, recorde, pausado = false
 
+        canvas = document.createElement("canvas");
+
+        ALTURA = window.innerHeight;
+        LARGURA = window.innerWidth;
+        canvas.width = LARGURA;
+        canvas.height = ALTURA;
+
+        if (canvas.width >= 600) {
+                canvas.width = 600;
+        }
+        if (canvas.height >= 600) {
+            canvas.height = 600;
+        }
+
         var estados = {
             "jogar": 0,
             "jogando": 1,
@@ -105,7 +119,7 @@
         player = {
             altura: 50,
             largura: 40,
-            x: 200,
+            x: canvas.width / 2,
             y: 500,
             cor: "#3ea616",
             velocidade: 7,
@@ -213,30 +227,29 @@
                 }
             },
 
-
         };
 
 
         function main() {
-            
-            canvas = document.createElement("canvas");
-
-            ALTURA = window.innerHeight;
-            LARGURA = window.innerWidth;
-
-            canvas.width = LARGURA;
-            canvas.height = ALTURA;
-
-            if (canvas.width >= 600) {
-                canvas.width = 600;
-            }
-            if (canvas.height >= 600) {
-                canvas.height = 600;
-            }
-
-
             ctx = canvas.getContext("2d");
             document.body.appendChild(canvas);
+
+            var btnPausar = document.createElement("button");
+            btnPausar.textContent = "Pausar";
+            btnPausar.style.position = "absolute";
+            btnPausar.style.top = "10px";
+            btnPausar.style.right = "10px";
+
+            btnPausar.addEventListener("click", function() {
+                if (estadoAtual == estados.jogando) {
+                    pausado = !pausado
+                }
+            });
+                
+            
+
+            document.body.appendChild(btnPausar)
+
 
             canvas.addEventListener("touchstart", function(event) {
                 player.handleTouchStart(event);
@@ -306,10 +319,6 @@
             // Atualiza as coordenadas de toque inicial para o próximo movimento
             touchStartX = touchX;
             touchStartY = touchY;
-        }
-
-        function isMobileDevice() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         }
 
 
