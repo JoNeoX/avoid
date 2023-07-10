@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Avoid!</title>
     <style>
-
-
         body {
             background-color: rgb(0, 0, 44);
         }
@@ -47,6 +45,59 @@
         }
         
         var teclas = []; 
+
+        powerups = {
+            
+            // red = vida
+            // yellow = invencivel
+            // black = morte
+            // blue = + 200 pts
+
+            _pwrps: [],
+            cores: ["yellow", "red", "black", "blue"],
+            delay: 200,
+            defaultdelay: 200,
+
+            insere: function() {
+                this._pwrps.push({
+                    x: Math.floor(600 * Math.random()),
+                    largura: 12,
+                    y: 0,
+                    altura: 12,
+                    velocidade: 3 + Math.floor(3 * Math.random()),
+                    cor: this.cores[Math.floor(4 * Math.random())]
+                })
+
+            },
+
+            atualiza: function() {
+                for (var i = 0, tam = this._pwrps.length; i < tam; i++) {
+                    var poder = this._pwrps[i];
+                    poder.y += poder.velocidade
+                }
+
+                this.delay --
+                if (this.delay <= 0) {
+                    this.insere()
+                    this.delay = this.defaultdelay
+                }
+
+                if (this.y > canvas.height) {
+                        this._pwrps.splice(i, 1);
+                        tam--;
+                        i--;
+                    }
+
+            },
+
+            desenha: function() {
+                for (var i = 0, tam = this._pwrps.length; i < tam; i++) {
+                    var poder = this._pwrps[i];
+                    ctx.fillStyle = poder.cor
+                    ctx.fillRect(poder.x, poder.y, poder.largura, poder.altura)
+                }
+            }
+        }
 
         meteoros = {
             _mtrs: [],
@@ -168,6 +219,10 @@
             
             },
 
+            nuke: function() {
+                meteoros.limpa()
+            },
+
 
             atualiza: function() {
 
@@ -201,10 +256,14 @@
                 
                 // Colisao
 
+                // red = vida
+                // yellow = nuke
+                // black = morte
+                // blue = + 200 pts
+
                 for (var i = 0, tam = meteoros._mtrs.length; i < tam; i++) {
                     var meteoro = meteoros._mtrs[i];
-                    if (
-                        this.x < meteoro.x + meteoro.largura &&
+                    if (this.x < meteoro.x + meteoro.largura &&
                         this.x + this.largura > meteoro.x &&
                         this.y < meteoro.y + meteoro.altura &&
                         this.y + this.altura > meteoro.y) {
@@ -212,6 +271,33 @@
                                 this.vidas--;
                                 meteoro.daDano = false;
                             }
+                        }
+                }
+                for (var i = 0, tam = powerups._pwrps.length; i < tam; i++) {
+                    var poder = powerups._pwrps[i];
+                    if(this.x < poder.x + poder.largura &&
+                        this.x + this.largura > poder.x &&
+                        this.y < poder.y + poder.altura &&
+                        this.y + this.altura > poder.y) {
+                            switch(poder.cor) {
+                                case "red": 
+                                    player.vidas += 1; 
+                                    powerups._pwrps.splice(poder, 1)
+                                    break;
+                                case "blue":
+                                    player.n += 200;
+                                    powerups._pwrps.splice(poder, 1)
+                                    break;
+                                case "yellow": 
+                                    player.nuke();
+                                    powerups._pwrps.splice(poder, 1)
+                                    break;
+                                case "black": 
+                                    player.vidas = 0;
+                                    powerups._pwrps.splice(poder, 1)
+                                    break;
+                            }
+                            
                         }
                 }
             },
@@ -245,11 +331,8 @@
                     pausado = !pausado
                 }
             });
-                
-            
 
             document.body.appendChild(btnPausar)
-
 
             canvas.addEventListener("touchstart", function(event) {
                 player.handleTouchStart(event);
@@ -346,6 +429,7 @@
 
             else if (estadoAtual == estados.jogando) {
                 meteoros.desenha();
+                powerups.desenha();
                 ctx.font = "40px Arial";
                 ctx.fillStyle = "#fff";
                 ctx.fillText("Pontos:" + player.pts, 20, 40);
@@ -369,6 +453,7 @@
             if (estadoAtual == estados.jogando && pausado == false) {
                 player.atualiza();
                 meteoros.atualiza();
+                powerups.atualiza()
             }
             
     
@@ -389,7 +474,7 @@
             player.pts = 0;
             player.n = 0;
             player.vidas = 2;
-            
+            powerups.delay = powerups.defaultdelay;
         }
 
         function roda() {
